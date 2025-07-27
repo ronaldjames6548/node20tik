@@ -8,8 +8,8 @@ import Layout from "@layouts/Layout.astro";
 import { t, getCurrentLanguage } from "@utils/i18n";
 
 export async function getStaticPaths({ paginate }) {
-	// Hardcode the language for this specific file (DE blog page)
-	const currentLang = "de";
+	// Hardcode the language for this specific file (AR blog page)
+	const currentLang = "ar";
 	
 	var posts = await getCollection("blog", ({ data }) => {
 		return !data.draft;
