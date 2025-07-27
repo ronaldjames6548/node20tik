@@ -7,10 +7,10 @@ import Sectionhead from "@components/sectionhead.astro";
 import Layout from "@layouts/Layout.astro";
 import { t, getCurrentLanguage } from "@utils/i18n";
 
-// Get current language from URL
-const currentLang = getCurrentLanguage(Astro.url);
-
 export async function getStaticPaths({ paginate }) {
+	// Hardcode the language for this specific file (DE blog page)
+	const currentLang = "de";
+	
 	var posts = await getCollection("blog", ({ data }) => {
 		return !data.draft;
 	});
@@ -18,7 +18,7 @@ export async function getStaticPaths({ paginate }) {
 	// Preprocess the posts to split the slugs and get the languages
 	var processedPosts = posts.map((post) => {
 		const [...slug] = post.slug.split("/");
-		let lang = "ar"; // Default language
+		let lang = "en"; // Default language
 		var firstSlug = post.slug.match(/^([^\/]*)\//);
 		if (firstSlug) {
 			lang = firstSlug[1];
@@ -30,7 +30,7 @@ export async function getStaticPaths({ paginate }) {
 		};
 	});
 	
-	// Filter posts based on the current language
+	// Filter posts based on the current language (AR)
 	const localizedPosts = processedPosts.filter(
 		(post) => post.lang === currentLang,
 	);
@@ -46,6 +46,9 @@ export async function getStaticPaths({ paginate }) {
 }
 
 const { page } = Astro.props;
+
+// Get current language from URL for component rendering
+const currentLang = getCurrentLanguage(Astro.url);
 ---
 
 <Layout title={t("mics.blog", currentLang)}>
