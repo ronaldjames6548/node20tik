@@ -1,34 +1,35 @@
 ---
-import Container from "@components/container.astro";
 import Layout from "@layouts/Layout.astro";
-import Hero from "@components/hero.astro";
+import Container from "@components/container.astro";
+import { t, getCurrentLanguage } from "@utils/i18n";
 
-import { localizePath } from "astro-i18next";
-
-import { t } from "astro-i18next";
-
-changeLanguage("ru");
-
-const title = "Error 404";
+// Get current language from URL
+const currentLang = getCurrentLanguage(Astro.url);
 ---
 
-<Layout title={translate("mics.404_title")}>
-	<Container>
-		<Hero />
-	<section class="flex items-center h-full p-16">
-		<div class="container flex flex-col items-center justify-center px-5 mx-auto my-8">
-			<div class="max-w-md text-center">
-				<h2 class="mb-8 font-bold text-4xl">
-					<span class="sr-only">{translate("mics.404_h2_text")}</span>
-					<span class="text-primary">{translate("mics.404_h2_text2")}</span>
-				</h2>
-				<p class="text-3xl font-semibold md:text-3xl">{translate("mics.404_line1")}</p>
-				<p class="mt-4 mb-8 text-lg text-muted dark:text-slate-400">{translate("mics.404_line2")}</p>
-				<a rel="noopener noreferrer" href={localizePath("/")} class="btn ml-4">{translate("mics.404_back")}</a>
-			</div>
-		</div>
-	</section>	
-		
-	</Container>
-	
+<Layout title={t("mics.404_title", currentLang)}>
+  <Container>
+    <div class="flex items-center justify-center min-h-[50vh]">
+      <div class="text-center">
+        <h1 class="text-6xl font-bold text-gray-900 dark:text-white mb-4">
+          {t("mics.404_h2_text", currentLang)}
+        </h1>
+        <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-300 mb-4">
+          {t("mics.404_h2_text2", currentLang)}
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400 mb-2">
+          {t("mics.404_line1", currentLang)}
+        </p>
+        <p class="text-gray-600 dark:text-gray-400 mb-8">
+          {t("mics.404_line2", currentLang)}
+        </p>
+        <a 
+          href={currentLang === 'ru' ? '/' : `/${currentLang}/`}
+          class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
+        >
+          {t("mics.404_back", currentLang)}
+        </a>
+      </div>
+    </div>
+  </Container>
 </Layout>
