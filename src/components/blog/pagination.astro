@@ -2,7 +2,7 @@
 import Link from "@components/ui/link.astro";
 import { localizePath } from "astro-i18next";
 import { Icon } from "astro-icon/components";
-import { t } from "i18next";
+import { t, getCurrentLanguage } from "../../utils/i18n";
 
 export interface Props {
 	prevUrl: string;
@@ -15,10 +15,13 @@ export interface Props {
 const {
 	prevUrl,
 	nextUrl,
-	prevText = "PREVIUS",
-	nextText = "NEXT",
+	prevText = "blog.prev",
+	nextText = "blog.next",
 	class: className,
 } = Astro.props;
+
+// Get current language
+const currentLang = getCurrentLanguage(Astro.url);
 ---
 
 {
@@ -28,12 +31,12 @@ const {
 				<Link href={localizePath(prevUrl)} style="muted" class={`${!prevUrl ? "invisible" : ""}`}>
 					<div class="flex flex-row align-middle">
 						<Icon name="tabler:chevron-left" class="w-6 h-6" />
-						<p class="ml-2">{t(prevText)}</p>
+						<p class="ml-2">{t(prevText, currentLang)}</p>
 					</div>
 				</Link>
 				<Link href={localizePath(nextUrl)} style="muted" class={`${!nextUrl ? "invisible" : ""}`}>
 					<div class="flex flex-row align-middle">
-						<span class="mr-2">{t(nextText)}</span>
+						<span class="mr-2">{t(nextText, currentLang)}</span>
 						<Icon name="tabler:chevron-right" class="w-6 h-6" />
 					</div>
 				</Link>
