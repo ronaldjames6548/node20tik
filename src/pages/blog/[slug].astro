@@ -3,19 +3,21 @@ import { getCollection } from "astro:content";
 import Container from "@components/container.astro";
 import Layout from "@layouts/Layout.astro";
 import { getArticleReadingTime } from "@utils/blog";
-import { localizePath } from "astro-i18next";
 import { Icon } from "astro-icon/components";
-import i18next, { changeLanguage } from "i18next";
-import { t } from "i18next";
-changeLanguage("en");
+import { t, getCurrentLanguage, getLocalizedUrl } from "@utils/i18n";
 
 // Generate a new path for every collection post
 export async function getStaticPaths() {
-	changeLanguage("en");
+	// Hardcode language for main file
+	const currentLang = "en";
+	
 	const blogEntries = await getCollection("blog");
+	
+	// Filter blog entries for current language
 	var localizedBlogEntries = blogEntries.filter((entry) =>
-		entry.slug.startsWith(i18next.language),
+		entry.slug.startsWith(currentLang),
 	);
+	
 	return localizedBlogEntries.map((post) => {
 		let slug = post.slug;
 		slug = slug.substring(3).replaceAll("blog/", "");
@@ -25,18 +27,22 @@ export async function getStaticPaths() {
 		};
 	});
 }
+
 // Get the post directly from the prop on render
-const { post, lang } = Astro.props;
+const { post } = Astro.props;
 const { data, render } = post;
 const { Content } = await render();
 const readTime = getArticleReadingTime(post.body);
+
+// Get current language for component rendering
+const currentLang = getCurrentLanguage(Astro.url);
 ---
 
-<Layout title={post.data.title} lang={lang}>
+<Layout title={post.data.title}>
 	<Container>
 		<div class="mx-auto prose prose-lg dark:prose-invert mt-14">
 			<a
-				href={localizePath(`/blog/category/${post.data.category?.toLowerCase()}`)}
+				href={getLocalizedUrl(`/blog/category/${post.data.category?.toLowerCase()}`, currentLang)}
 				class="text-blue-400 dark:text-stone-400 uppercase tracking-wider text-sm font-medium no-underline">
 				{post.data.category}
 			</a>
@@ -47,7 +53,7 @@ const readTime = getArticleReadingTime(post.body);
 				<div class="w-full md:w-auto flex flex-wrap gap-3">
 					{
 						post.data.tags.map((tag) => (
-							<a href={localizePath(`/blog/tag/${tag?.toLowerCase()}`)} class="text-sm text-gray-500 dark:text-stone-300">
+							<a href={getLocalizedUrl(`/blog/tag/${tag?.toLowerCase()}`, currentLang)} class="text-sm text-gray-500 dark:text-stone-300">
 								#{tag}
 							</a>
 						))
@@ -73,10 +79,10 @@ const readTime = getArticleReadingTime(post.body);
 			<Content />
 		</div>
 		<div class="mx-auto mt-20">
-			<a href={localizePath("/blog")}>
+			<a href={getLocalizedUrl("/blog", currentLang)}>
 				<div class="flex flex-row align-middle justify-center dark:text-stone-200">
 					<Icon name="tabler:chevron-left" class="w-6 h-6" />
-					<p class="ml-2">{t("mics.back_blog")}</p>
+					<p class="ml-2">{t("mics.back_blog", currentLang)}</p>
 				</div>
 			</a>
 		</div>

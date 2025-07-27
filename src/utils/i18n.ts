@@ -84,15 +84,15 @@ export function getCurrentLanguage(url: URL): string {
   return 'en';
 }
 
-// Helper function to get localized URL
+// Helper function to get localized URL (replaces localizePath)
 export function getLocalizedUrl(path: string, lang: string): string {
   // Remove leading slash and language prefix if present
   const cleanPath = path.replace(/^\/([a-z]{2})?(\/|$)/, '/');
   
   // Return URL with or without language prefix
   if (lang === 'en') {
-    return cleanPath;
+    return cleanPath === '/' ? '/' : cleanPath;
   }
   
-  return `/${lang}${cleanPath}`;
+  return `/${lang}${cleanPath === '/' ? '' : cleanPath}`;
 }

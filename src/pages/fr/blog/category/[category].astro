@@ -1,56 +1,45 @@
 ---
+// Template for src/pages/blog/category/[category].astro
 import { getCollection } from "astro:content";
-import Pagination from "@components/blog/pagination.astro";
-import Posts from "@components/blog/posts.astro";
+import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import Sectionhead from "@components/sectionhead.astro";
-import Layout from "@layouts/Layout.astro";
-import i18next, { changeLanguage } from "i18next";
-import { t } from "i18next";
-
-changeLanguage("fr");
+import Posts from "@components/blog/posts.astro";
+import { t, getCurrentLanguage, getLocalizedUrl } from "@utils/i18n";
 
 export async function getStaticPaths() {
-	changeLanguage("fr");
-	const posts = await getCollection("blog", ({ data }) => {
-		return !data.draft && data.publishDate < new Date();
-	});
-	const localizedPosts = posts.filter((page) => {
-		const [lang, ...slug] = page.slug.split("/");
-		return lang === i18next.language;
-	});
-	const categories = new Set();
-	localizedPosts.map((post) => {
-		typeof post.data.category === "string" &&
-			categories.add(post.data.category.toLowerCase());
-	});
-	return Array.from(categories).map((category) => {
-		return {
-			params: { category: category },
-			props: {
-				posts: localizedPosts.filter(
-					(post) => typeof post.data.category === "string",
-				),
-				category: category,
-				lang: i18next.language,
-			},
-		};
-	});
+  // Hardcode language for main file - change for language-specific files
+  const currentLang = "fr"; // Change to "ar", "it", etc. for language-specific files
+  
+  const posts = await getCollection("blog", ({ data }) => {
+    return !data.draft;
+  });
+
+  const categories = [...new Set(posts.map(post => post.data.category))];
+  
+  return categories.map(category => ({
+    params: { category },
+    props: { posts: posts.filter(post => post.data.category === category) }
+  }));
 }
-// Get the post directly from the prop on render
-const { posts, category, lang } = Astro.props;
-const pageTitle = `${t("mics.category_title1")} ${category} ${t("mics.category_title2")}`;
 
+const { category } = Astro.params;
+const { posts } = Astro.props;
+
+// Get current language for component rendering
+const currentLang = getCurrentLanguage(Astro.url);
 ---
-<Layout title={pageTitle}>
-	<Container>
-		<Sectionhead>
-			<Fragment slot="title">{pageTitle}</Fragment>
-            <Fragment slot="desc">
-                {`${t("mics.category_desc")} ${category} ${t("mics.category_desc2")}`}
-            </Fragment>
-		</Sectionhead>
-		<Posts posts={posts} />
-	</Container>
-</Layout>
 
+<Layout title={t("mics.category_title1", currentLang) + " " + category}>
+  <Container>
+    <Sectionhead>
+      <Fragment slot="title">
+        {t("mics.category_title1", currentLang)} {category} {t("mics.category_title2", currentLang)}
+      </Fragment>
+      <Fragment slot="desc">
+        {t("mics.category_desc", currentLang)} {category} {t("mics.category_desc2", currentLang)}
+      </Fragment>
+    </Sectionhead>
+    <Posts posts={posts} />
+  </Container>
+</Layout>
