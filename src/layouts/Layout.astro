@@ -1,13 +1,12 @@
 ---
 import { ViewTransitions } from "astro:transitions";
-import  SpeedInsights  from "@vercel/speed-insights/astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
 import { pwaInfo } from "virtual:pwa-info";
 import Footer from "@components/footer.astro";
 import Navbar from "@components/navbar/navbar.astro";
 import "@fontsource-variable/inter";
-import { HeadHrefLangs } from "astro-i18next/components";
 import { SEO } from "astro-seo";
-import i18next from "astro-i18next";
+import { getCurrentLanguage } from "@utils/i18n";
 
 export interface Props {
   title?: string;
@@ -23,79 +22,95 @@ const resolvedImageWithDomain = new URL(
   Astro.site,
 ).toString();
 
+// Get current language from URL
+const currentLang = getCurrentLanguage(Astro.url);
+
 const { 
   title, 
-  lang = null, 
+  lang = currentLang, 
   description = "TikTokio - Tiktok downloader to online download tiktok videos in mp4 without watermark easily, Tiktok video downloader is Fast, easy and works on any device",
   heroTitle = "TikTokio - Free TikTok Video Downloader"
 } = Astro.props;
 
 const makeTitle = title || "TikTokio: TikTok Downloader - Download TikTok Videos no Watermark";
+
+// Generate hreflang URLs for SEO
+const languages = ["en", "it", "fr", "de", "es", "hi", "ar", "id", "ru", "pt", "ko", "tl", "nl", "ms", "tr"];
+const currentPath = Astro.url.pathname.replace(/^\/[a-z]{2}(\/|$)/, '/');
 ---
-<html lang={lang ?? i18next.language}>
+
+<html lang={lang}>
   <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-  <meta name="generator" content={Astro.generator} />
-  <meta name="theme-color" content="#ffffff" />
-<SpeedInsights />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#ffffff" />
+    
+    <SpeedInsights />
 
-		<HeadHrefLangs />
+    <!-- Generate hreflang tags for SEO -->
+    {languages.map(language => {
+      const href = language === 'en' 
+        ? `${Astro.site}${currentPath === '/' ? '' : currentPath}` 
+        : `${Astro.site}${language}${currentPath === '/' ? '' : currentPath}`;
+      return <link rel="alternate" hreflang={language} href={href} />;
+    })}
+    <link rel="alternate" hreflang="x-default" href={`${Astro.site}${currentPath === '/' ? '' : currentPath}`} />
 
-<script src="https://analytics.ahrefs.com/analytics.js" data-key="Ku8HzupxQ7S1X+ddBrs6UQ" async></script>
+    <script src="https://analytics.ahrefs.com/analytics.js" data-key="Ku8HzupxQ7S1X+ddBrs6UQ" async></script>
 
-  <ViewTransitions />
+    <ViewTransitions />
 
-  <!-- Global CSS -->
-  <link rel="stylesheet" href="/index.css" />
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="/index.css" />
 
-  <SEO
-    title={makeTitle}
-    description={description}
-    canonical={canonicalURL}
-    openGraph={{
-      basic: {
-        url: canonicalURL,
-        type: "website",
-        title: makeTitle,
-        image: resolvedImageWithDomain,
-      },
-      image: {
-        alt: heroTitle,
-      },
-    }}
-  />
+    <SEO
+      title={makeTitle}
+      description={description}
+      canonical={canonicalURL}
+      openGraph={{
+        basic: {
+          url: canonicalURL,
+          type: "website",
+          title: makeTitle,
+          image: resolvedImageWithDomain,
+        },
+        image: {
+          alt: heroTitle,
+        },
+      }}
+    />
 
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={makeTitle} />
-  <meta name="twitter:description" content={description} />
-  <meta name="twitter:image" content={resolvedImageWithDomain} />
-  <meta name="twitter:site" content="@YourTwitterHandle" />
-  <meta name="twitter:creator" content="@AuthorTwitterHandle" />
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={makeTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={resolvedImageWithDomain} />
+    <meta name="twitter:site" content="@YourTwitterHandle" />
+    <meta name="twitter:creator" content="@AuthorTwitterHandle" />
 
-  <!-- Theme Switching -->
-  <script is:inline>
-    function handleThemeChange() {
-      if (
-        localStorage.theme === "dark" ||
-        (!("theme" in localStorage) &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches)
-      ) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
+    <!-- Theme Switching -->
+    <script is:inline>
+      function handleThemeChange() {
+        if (
+          localStorage.theme === "dark" ||
+          (!("theme" in localStorage) &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches)
+        ) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
       }
-    }
-    handleThemeChange();
-    document.removeEventListener("astro:after-swap", handleThemeChange);
-    document.addEventListener("astro:after-swap", handleThemeChange);
-  </script>
+      handleThemeChange();
+      document.removeEventListener("astro:after-swap", handleThemeChange);
+      document.addEventListener("astro:after-swap", handleThemeChange);
+    </script>
 
-  {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
-  <script src="/src/pwa.ts"></script>
-</head>
+    {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
+    <script src="/src/pwa.ts"></script>
+  </head>
   <body class="dark:bg-stone-950">
     <Navbar />
     <slot />
@@ -105,7 +120,7 @@ const makeTitle = title || "TikTokio: TikTok Downloader - Download TikTok Videos
       /* https://css-tricks.com/almanac/properties/c/content-visibility/  */
       img {
         content-visibility: auto;
-		contain-intrinsic-size: 0 200px;
+        contain-intrinsic-size: 0 200px;
       }
     </style>
   </body>

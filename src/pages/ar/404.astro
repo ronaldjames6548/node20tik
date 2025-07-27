@@ -3,7 +3,7 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import { t, getCurrentLanguage } from "@utils/i18n";
 
-// Get current language from URL
+// Get current language from URL - this automatically detects the language
 const currentLang = getCurrentLanguage(Astro.url);
 ---
 
