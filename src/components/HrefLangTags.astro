@@ -1,0 +1,38 @@
+---
+import { getUrl, locales } from "../utils/localize";
+
+const currentPath = Astro.url.pathname;
+const defaultLocale = locales[0]; // Assuming first locale is default (en)
+---
+
+<!-- Canonical URL -->
+<link rel="canonical" href={getUrl(Astro, defaultLocale, currentPath)} />
+
+<!-- Alternate Language Versions -->
+{
+  locales.map((locale) => {
+    const url = getUrl(Astro, locale, currentPath);
+    return (
+      <link 
+        rel="alternate" 
+        hreflang={locale} 
+        href={url}
+        key={`hreflang-${locale}`}
+      />
+    );
+  })
+}
+
+<!-- x-default Fallback -->
+<link 
+  rel="alternate" 
+  hreflang="x-default" 
+  href={getUrl(Astro, defaultLocale, currentPath)} 
+/>
+
+<!-- Self-reference (recommended by Google) -->
+<link 
+  rel="alternate" 
+  hreflang={Astro.props.locale || defaultLocale} 
+  href={Astro.url.href} 
+/>

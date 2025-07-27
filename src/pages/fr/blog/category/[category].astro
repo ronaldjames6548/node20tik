@@ -1,0 +1,56 @@
+---
+import { getCollection } from "astro:content";
+import Pagination from "@components/blog/pagination.astro";
+import Posts from "@components/blog/posts.astro";
+import Container from "@components/container.astro";
+import Sectionhead from "@components/sectionhead.astro";
+import Layout from "@layouts/Layout.astro";
+import i18next, { changeLanguage } from "i18next";
+import { t } from "i18next";
+
+changeLanguage("fr");
+
+export async function getStaticPaths() {
+	changeLanguage("fr");
+	const posts = await getCollection("blog", ({ data }) => {
+		return !data.draft && data.publishDate < new Date();
+	});
+	const localizedPosts = posts.filter((page) => {
+		const [lang, ...slug] = page.slug.split("/");
+		return lang === i18next.language;
+	});
+	const categories = new Set();
+	localizedPosts.map((post) => {
+		typeof post.data.category === "string" &&
+			categories.add(post.data.category.toLowerCase());
+	});
+	return Array.from(categories).map((category) => {
+		return {
+			params: { category: category },
+			props: {
+				posts: localizedPosts.filter(
+					(post) => typeof post.data.category === "string",
+				),
+				category: category,
+				lang: i18next.language,
+			},
+		};
+	});
+}
+// Get the post directly from the prop on render
+const { posts, category, lang } = Astro.props;
+const pageTitle = `${t("mics.category_title1")} ${category} ${t("mics.category_title2")}`;
+
+---
+<Layout title={pageTitle}>
+	<Container>
+		<Sectionhead>
+			<Fragment slot="title">{pageTitle}</Fragment>
+            <Fragment slot="desc">
+                {`${t("mics.category_desc")} ${category} ${t("mics.category_desc2")}`}
+            </Fragment>
+		</Sectionhead>
+		<Posts posts={posts} />
+	</Container>
+</Layout>
+

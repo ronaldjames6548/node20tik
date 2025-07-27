@@ -1,0 +1,92 @@
+---
+import Container from "@components/container.astro";
+import Sectionhead from "@components/sectionhead.astro";
+import Button from "@components/ui/button.astro";
+import Layout from "@layouts/Layout.astro";
+import { t } from "astro-i18next";
+
+
+const contacts = [
+    {
+        title: "Marketing",
+        email: "test@yourcompany.com",
+        phone: "+1 (555) 555-5555",
+    },
+    {
+        title: "Human Resources",
+        email: "test@yourcompany.com",
+        phone: "+1 (555) 555-5555",
+    },
+    {
+        title: "Finance",
+        email: "test@yourcompany.com",
+        phone: "+1 (555) 555-5555",
+    },
+    {
+        title: "Research and Development",
+        email: "test@yourcompany.com",
+        phone: "+1 (555) 555-5555",
+    },
+];
+---
+<Layout 
+  title={translate("mics.contact_title")} 
+  description={translate("site.description")} 
+  heroTitle={translate("hero.title")}
+>
+
+	<Container>
+		<section class="bg-white-50 dark:bg-slate-800" id="contact">
+    <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+        <div class="mb-4">
+            <div class="mb-6 max-w-3xl text-center sm:text-center md:mx-auto md:mb-12">
+                <h1 class="font-heading mb-4 font-bold tracking-tight text-gray-900 dark:text-white text-3xl sm:text-5xl">{translate("mics.contact_h1")}</h1>
+				<h2 class="text-base font-semibold uppercase tracking-wide text-blue-600 text-xl sm:text-3xl dark:text-blue-200">{translate("mics.contact_h2")}</h2>
+            </div>
+        </div>
+        <div class="flex items-stretch justify-center">
+            <div class="grid md:grid-cols-2">
+                <div class="h-full pr-6">
+                    <p class="mt-3 mb-12 text-lg text-gray-600 dark:text-slate-400">
+                      		{translate("mics.contact_text")}
+
+                    </p>
+                    
+                       <div>
+        <div class="image object-center text-center">
+            <img src="/images/privacy-policy-tiktokio.webp" alt="privacy-policy-tiktokio">
+        </div>
+    </div>
+                            
+                                
+                          
+                            
+                      
+                </div>
+                <div class="card h-fit max-w-6xl p-5 md:p-12" id="form">
+                    <h2 class="mb-4 text-2xl font-bold dark:text-white">{translate("mics.contact_form_h")}</h2>
+                    <form id="contactForm">
+                        <div class="mb-6">
+                            <div class="mx-0 mb-1 sm:mb-4">
+                                <div class="mx-0 mb-1 sm:mb-4">
+                                    <label for="name" class="pb-1 text-xs uppercase tracking-wider"></label><input type="text" id="name" autocomplete="given-name" placeholder={translate("mics.contact_form_f1")} class="mb-2 w-full rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md dark:text-gray-300 sm:mb-0" name="name">
+                                </div>
+                                <div class="mx-0 mb-1 sm:mb-4">
+                                    <label for="email" class="pb-1 text-xs uppercase tracking-wider"></label><input type="email" id="email" autocomplete="email" placeholder={translate("mics.contact_form_f2")} class="mb-2 w-full rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md dark:text-gray-300 sm:mb-0" name="email">
+                                </div>
+                            </div>
+                            <div class="mx-0 mb-1 sm:mb-4">
+                                <label for="textarea" class="pb-1 text-xs uppercase tracking-wider"></label><textarea id="textarea" name="textarea" cols="30" rows="5" placeholder={translate("mics.contact_form_f3")} class="mb-2 w-full rounded-md border border-gray-400 py-2 pl-2 pr-4 shadow-md dark:text-gray-300 sm:mb-0"></textarea>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="w-full bg-blue-800 text-white px-6 py-3 font-xl rounded-md sm:mb-0">{translate("mics.contact_submit")}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+	</Container>
+</Layout>

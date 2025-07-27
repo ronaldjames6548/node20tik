@@ -1,0 +1,43 @@
+---
+import Container from "@components/container.astro";
+import Faq from "@components/faq.astro";
+import Features from "@components/features.astro";
+import Hero from "@components/hero.astro";
+import Newsletter from "@components/newsletter.astro";
+import Logos from "@components/logos.astro";
+import Layout from "@layouts/Layout.astro";
+import { t } from "../utils/i18n";
+
+// Define supported languages (excluding English)
+const supportedLanguages = ['it', 'fr', 'de', 'es', 'hi', 'ar', 'id', 'ru', 'pt', 'ko', 'tl', 'nl', 'ms', 'tr'];
+
+export async function getStaticPaths() {
+  return supportedLanguages.map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params;
+
+// Validate language
+if (!supportedLanguages.includes(lang as string)) {
+  return Astro.redirect('/404');
+}
+
+const currentLang = lang as string;
+const translate = (key: string) => t(key, currentLang);
+---
+<Layout 
+  title={translate("site.title")} 
+  description={translate("site.description")} 
+  heroTitle={translate("hero.title")}
+  lang={currentLang}
+>
+  <Container>
+    <Hero />
+    <Features />
+    <Newsletter />
+    <Logos />
+    <Faq />
+  </Container>
+</Layout>
