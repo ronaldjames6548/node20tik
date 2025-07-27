@@ -19,6 +19,14 @@ export default defineConfig({
       enabled: true,
     },
   }),
+  // ADD THIS i18n CONFIGURATION
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "it", "fr", "de", "es", "hi", "ar", "id", "ru", "pt", "ko", "tl", "nl", "ms", "tr"],
+    routing: {
+      prefixDefaultLocale: false
+    }
+  },
   vite: {
     define: {
       __DATE__: `'${new Date().toISOString()}'`

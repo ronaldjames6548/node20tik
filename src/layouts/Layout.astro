@@ -22,8 +22,14 @@ const resolvedImageWithDomain = new URL(
   Astro.site,
 ).toString();
 
-// Get current language from URL
-const currentLang = getCurrentLanguage(Astro.url);
+// Get current language from URL - with error handling
+let currentLang: string;
+try {
+  currentLang = getCurrentLanguage(Astro.url);
+} catch (error) {
+  console.warn('Error getting current language:', error);
+  currentLang = 'en';
+}
 
 const { 
   title, 
@@ -34,9 +40,32 @@ const {
 
 const makeTitle = title || "TikTokio: TikTok Downloader - Download TikTok Videos no Watermark";
 
-// Generate hreflang URLs for SEO
+// Generate hreflang URLs for SEO - with error handling
 const languages = ["en", "it", "fr", "de", "es", "hi", "ar", "id", "ru", "pt", "ko", "tl", "nl", "ms", "tr"];
-const currentPath = Astro.url.pathname.replace(/^\/[a-z]{2}(\/|$)/, '/');
+let currentPath: string;
+try {
+  currentPath = Astro.url.pathname.replace(/^\/[a-z]{2}(\/|$)/, '/');
+} catch (error) {
+  console.warn('Error processing pathname:', error);
+  currentPath = '/';
+}
+
+// Safe function to generate hreflang URLs
+const generateHrefLangUrl = (language: string): string => {
+  try {
+    const baseUrl = Astro.site?.toString() || 'https://tiktokio.cam';
+    const path = currentPath === '/' ? '' : currentPath;
+    
+    if (language === 'en') {
+      return `${baseUrl}${path}`;
+    } else {
+      return `${baseUrl}/${language}${path}`;
+    }
+  } catch (error) {
+    console.warn(`Error generating hreflang URL for ${language}:`, error);
+    return `${Astro.site || 'https://tiktokio.cam'}`;
+  }
+};
 ---
 
 <html lang={lang}>
@@ -49,14 +78,20 @@ const currentPath = Astro.url.pathname.replace(/^\/[a-z]{2}(\/|$)/, '/');
     
     <SpeedInsights />
 
-    <!-- Generate hreflang tags for SEO -->
-    {languages.map(language => {
-      const href = language === 'en' 
-        ? `${Astro.site}${currentPath === '/' ? '' : currentPath}` 
-        : `${Astro.site}${language}${currentPath === '/' ? '' : currentPath}`;
-      return <link rel="alternate" hreflang={language} href={href} />;
-    })}
-    <link rel="alternate" hreflang="x-default" href={`${Astro.site}${currentPath === '/' ? '' : currentPath}`} />
+    <!-- Generate hreflang tags for SEO - with error handling -->
+    {languages && Array.isArray(languages) && languages.map(language => {
+      if (!language || typeof language !== 'string') return null;
+      
+      try {
+        const href = generateHrefLangUrl(language);
+        return <link rel="alternate" hreflang={language} href={href} />;
+      } catch (error) {
+        console.warn(`Error creating hreflang for ${language}:`, error);
+        return null;
+      }
+    }).filter(Boolean)}
+    
+    <link rel="alternate" hreflang="x-default" href={generateHrefLangUrl('en')} />
 
     <script src="https://analytics.ahrefs.com/analytics.js" data-key="Ku8HzupxQ7S1X+ddBrs6UQ" async></script>
 

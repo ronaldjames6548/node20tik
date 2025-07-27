@@ -1,0 +1,64 @@
+---
+// src/components/HeadHrefLangs.astro
+// Fixed version of HeadHrefLangs that handles undefined cases
+import { getLocaleFromUrl } from "astro-i18next";
+
+// Define your locales explicitly (from your astro-i18next.config.mjs)
+const supportedLocales = ["en", "it", "fr", "de", "es", "hi", "ar", "id", "ru", "pt", "ko", "tl", "nl", "ms", "tr"];
+
+const currentLocale = getLocaleFromUrl(Astro.url) || "en";
+const currentUrl = Astro.url.href;
+
+// Function to create localized URL
+const localizeUrl = (url, locale) => {
+  try {
+    const urlObj = new URL(url);
+    const baseUrl = `${urlObj.protocol}//${urlObj.host}`;
+    
+    // Remove existing locale from pathname
+    let pathname = urlObj.pathname;
+    supportedLocales.forEach(loc => {
+      if (loc !== "en" && pathname.startsWith(`/${loc}/`)) {
+        pathname = pathname.substring(`/${loc}`.length);
+      } else if (loc !== "en" && pathname === `/${loc}`) {
+        pathname = "/";
+      }
+    });
+    
+    // Add new locale (except for default locale "en")
+    if (locale === "en") {
+      return `${baseUrl}${pathname}${urlObj.search}${urlObj.hash}`;
+    } else {
+      return `${baseUrl}/${locale}${pathname}${urlObj.search}${urlObj.hash}`;
+    }
+  } catch (error) {
+    console.warn(`Error localizing URL for locale ${locale}:`, error);
+    return url;
+  }
+};
+---
+
+{supportedLocales && Array.isArray(supportedLocales) && supportedLocales.map((locale) => {
+  if (!locale || typeof locale !== "string") return null;
+  
+  try {
+    const localizedUrl = localizeUrl(currentUrl, locale);
+    return (
+      <link
+        rel="alternate"
+        hreflang={locale}
+        href={localizedUrl}
+      />
+    );
+  } catch (error) {
+    console.warn(`Error creating hreflang for locale ${locale}:`, error);
+    return null;
+  }
+}).filter(Boolean)}
+
+<!-- Add x-default for SEO (points to English version) -->
+<link
+  rel="alternate"
+  hreflang="x-default"
+  href={localizeUrl(currentUrl, "en")}
+/>

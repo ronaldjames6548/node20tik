@@ -1,13 +1,12 @@
 ---
 import { ViewTransitions } from "astro:transitions";
-import  SpeedInsights  from "@vercel/speed-insights/astro";
+import SpeedInsights from "@vercel/speed-insights/astro";
 import { pwaInfo } from "virtual:pwa-info";
 import Footer from "@components/footer.astro";
 import Navbar from "@components/navbar/navbar.astro";
 import "@fontsource-variable/inter";
-import { HeadHrefLangs } from "astro-i18next/components";
 import { SEO } from "astro-seo";
-import i18next from "astro-i18next";
+import { getCurrentLanguage } from "@utils/i18n";
 
 export interface Props {
   title?: string;
@@ -23,79 +22,130 @@ const resolvedImageWithDomain = new URL(
   Astro.site,
 ).toString();
 
+// Get current language from URL - with error handling
+let currentLang: string;
+try {
+  currentLang = getCurrentLanguage(Astro.url);
+} catch (error) {
+  console.warn('Error getting current language:', error);
+  currentLang = 'en';
+}
+
 const { 
   title, 
-  lang = null, 
-  description = "Easily download TikTok videos without watermark with Tiktokio free Tiktok downloader. Save Tiktok video in MP4 format. No sign-up, free downloads on all device.",
-  heroTitle = "TikTokio - Download TikTok Video Without Watermark"
+  lang = currentLang, 
+  description = "TikTokio - Tiktok downloader to online download tiktok videos in mp4 without watermark easily, Tiktok video downloader is Fast, easy and works on any device",
+  heroTitle = "TikTokio - Free TikTok Video Downloader"
 } = Astro.props;
 
-const makeTitle = title || "Tiktokio - Download TikTok Video Online Without Watermark easily";
----
-<html lang={lang ?? i18next.language}>
-  <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-  <meta name="generator" content={Astro.generator} />
-  <meta name="theme-color" content="#ffffff" />
-<SpeedInsights />
+const makeTitle = title || "TikTokio: TikTok Downloader - Download TikTok Videos no Watermark";
 
-		<HeadHrefLangs />
+// Generate hreflang URLs for SEO - with error handling
+const languages = ["en", "it", "fr", "de", "es", "hi", "ar", "id", "ru", "pt", "ko", "tl", "nl", "ms", "tr"];
+let currentPath: string;
+try {
+  currentPath = Astro.url.pathname.replace(/^\/[a-z]{2}(\/|$)/, '/');
+} catch (error) {
+  console.warn('Error processing pathname:', error);
+  currentPath = '/';
+}
 
-<script src="https://analytics.ahrefs.com/analytics.js" data-key="Ku8HzupxQ7S1X+ddBrs6UQ" async></script>
-
-  <ViewTransitions />
-
-  <!-- Global CSS -->
-  <link rel="stylesheet" href="/index.css" />
-
-  <SEO
-    title={makeTitle}
-    description={description}
-    canonical={canonicalURL}
-    openGraph={{
-      basic: {
-        url: canonicalURL,
-        type: "website",
-        title: makeTitle,
-        image: resolvedImageWithDomain,
-      },
-      image: {
-        alt: heroTitle,
-      },
-    }}
-  />
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={makeTitle} />
-  <meta name="twitter:description" content={description} />
-  <meta name="twitter:image" content={resolvedImageWithDomain} />
-  <meta name="twitter:site" content="@YourTwitterHandle" />
-  <meta name="twitter:creator" content="@AuthorTwitterHandle" />
-
-  <!-- Theme Switching -->
-  <script is:inline>
-    function handleThemeChange() {
-      if (
-        localStorage.theme === "dark" ||
-        (!("theme" in localStorage) &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches)
-      ) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
+// Safe function to generate hreflang URLs
+const generateHrefLangUrl = (language: string): string => {
+  try {
+    const baseUrl = Astro.site?.toString() || 'https://tiktokio.cam';
+    const path = currentPath === '/' ? '' : currentPath;
+    
+    if (language === 'en') {
+      return `${baseUrl}${path}`;
+    } else {
+      return `${baseUrl}/${language}${path}`;
     }
-    handleThemeChange();
-    document.removeEventListener("astro:after-swap", handleThemeChange);
-    document.addEventListener("astro:after-swap", handleThemeChange);
-  </script>
+  } catch (error) {
+    console.warn(`Error generating hreflang URL for ${language}:`, error);
+    return `${Astro.site || 'https://tiktokio.cam'}`;
+  }
+};
+---
 
-  {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
-  <script src="/src/pwa.ts"></script>
-</head>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#ffffff" />
+    
+    <SpeedInsights />
+
+    <!-- Generate hreflang tags for SEO - with error handling -->
+    {languages && Array.isArray(languages) && languages.map(language => {
+      if (!language || typeof language !== 'string') return null;
+      
+      try {
+        const href = generateHrefLangUrl(language);
+        return <link rel="alternate" hreflang={language} href={href} />;
+      } catch (error) {
+        console.warn(`Error creating hreflang for ${language}:`, error);
+        return null;
+      }
+    }).filter(Boolean)}
+    
+    <link rel="alternate" hreflang="x-default" href={generateHrefLangUrl('en')} />
+
+    <script src="https://analytics.ahrefs.com/analytics.js" data-key="Ku8HzupxQ7S1X+ddBrs6UQ" async></script>
+
+    <ViewTransitions />
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="/index.css" />
+
+    <SEO
+      title={makeTitle}
+      description={description}
+      canonical={canonicalURL}
+      openGraph={{
+        basic: {
+          url: canonicalURL,
+          type: "website",
+          title: makeTitle,
+          image: resolvedImageWithDomain,
+        },
+        image: {
+          alt: heroTitle,
+        },
+      }}
+    />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={makeTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={resolvedImageWithDomain} />
+    <meta name="twitter:site" content="@YourTwitterHandle" />
+    <meta name="twitter:creator" content="@AuthorTwitterHandle" />
+
+    <!-- Theme Switching -->
+    <script is:inline>
+      function handleThemeChange() {
+        if (
+          localStorage.theme === "dark" ||
+          (!("theme" in localStorage) &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches)
+        ) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      }
+      handleThemeChange();
+      document.removeEventListener("astro:after-swap", handleThemeChange);
+      document.addEventListener("astro:after-swap", handleThemeChange);
+    </script>
+
+    {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
+    <script src="/src/pwa.ts"></script>
+  </head>
   <body class="dark:bg-stone-950">
     <Navbar />
     <slot />
@@ -105,7 +155,7 @@ const makeTitle = title || "Tiktokio - Download TikTok Video Online Without Wate
       /* https://css-tricks.com/almanac/properties/c/content-visibility/  */
       img {
         content-visibility: auto;
-		contain-intrinsic-size: 0 200px;
+        contain-intrinsic-size: 0 200px;
       }
     </style>
   </body>
